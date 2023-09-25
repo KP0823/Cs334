@@ -28,7 +28,7 @@ def NFA():
    dic ={}
    keys=list(itertools.product(states,sigma))
    for i in keys:
-       dic[i]=[]
+       dic[i]=[0]
    
 
 
