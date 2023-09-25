@@ -44,18 +44,26 @@ class NDFA:
             else:
                 dic[key]+=[value]
         return dic
-
+    
+    @staticmethod
+    def state_to_go_to(target_spec, index):
+        if index==1:
+            if target_spec[index]==[] and target_spec[0]!=[]:
+                return (target_spec[0][-1],False)
+            else:
+                return (target_spec[index],True)
+        if index==0:
+            if target_spec[index]==[] and target_spec[1]!=[]:
+                return (target_spec[1][-1],False)
+            else:
+                return (target_spec[index],True)
+    
+    
 def main():
     first=NDFA()
     first.read_from_stdin()
     result=first.convert_delta()
     last_key=list(result)[-1]
-    for key,value in result.items():
-        if(key!=last_key):
-            print(str(key) +": "+str(value)+",")
-        else:
-            print(str(key) +": "+str(value)+"")
-    
 
 if __name__=="__main__":
     main()
