@@ -47,16 +47,12 @@ class NDFA:
     
     @staticmethod
     def state_to_go_to(target_spec, index):
-        if index==1:
-            if target_spec[index]==[] and target_spec[0]!=[]:
-                return (target_spec[0][-1],False)
-            else:
-                return (target_spec[index],True)
-        if index==0:
-            if target_spec[index]==[] and target_spec[1]!=[]:
-                return (target_spec[1][-1],False)
-            else:
-                return (target_spec[index],True)
+        #0 works if its null and episillion
+        if target_spec[0]!=[] and len(target_spec[0])>index:
+            return(target_spec[0][index],True)
+        else:
+            return(target_spec[1][0],False)
+        
     
     
 def main():
@@ -64,6 +60,15 @@ def main():
     first.read_from_stdin()
     result=first.convert_delta()
     last_key=list(result)[-1]
-
+    index=0
+    for key,values in result.items():
+        if values==[[],[]]:
+           continue
+        else:
+            while index<(len(values[0]) +len(values[1])) :
+                add=first.state_to_go_to(values,index)
+                print(str(key)+", "+str(index)+", "+ str(add)+"")
+                index+=1
+            index=0
 if __name__=="__main__":
     main()
