@@ -1,5 +1,5 @@
 
-import sys,itertools,pprint
+import sys,itertools
 
 class NDFA:
     def __init__(self):
