@@ -29,14 +29,7 @@ class NDFA:
         self.F = eval(self.F)
 
 #       return states, sigma, dlt, qs, F
-    def read_choice_input():
-        choice_sequence=sys.stdin.readline()
-        choice_sequence=eval(choice_sequence)
 
-        input_string=sys.stdin.readline()
-        input_string=eval(choice_sequence)
-        
-        return choice_sequence, input_string
     def convert_delta(self):
         dic ={}
         state=self.states
@@ -62,14 +55,23 @@ class NDFA:
         else:
             return(target_spec[1][0],False)
         
-    def follow_choice(self,choice_sequence, input_string):
+    #def follow_choice(self,choice_sequence, input_string):
 
+def read_choice_input():
+    choice_sequence=sys.stdin.readline()
+    choice_sequence=eval(choice_sequence)
+
+    input_string=sys.stdin.readline()
+    input_string=eval(input_string)
+
+    return choice_sequence, input_string
     
 def main():
     first=NDFA()
     first.read_from_stdin()
-    choice_sequence=
+    choice_sequence ,input_string=read_choice_input()
     result=first.convert_delta()
+    
     last_key=list(result)[-1]
     index=0
     for key,values in result.items():
