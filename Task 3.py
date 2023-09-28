@@ -1,6 +1,13 @@
 
 import sys,itertools
-
+@staticmethod
+def state_to_go_to(target_spec, index):
+    #0 works if its null and episillion
+    if target_spec[0]!=[] and len(target_spec[0])>index:
+        return(target_spec[0][index],True)
+    else:
+        return(target_spec[1][0],False)
+    
 class NDFA:
     def __init__(self):
         self.states=None
@@ -47,15 +54,27 @@ class NDFA:
                 dic[key]+=[value]
         return dic
     
-    @staticmethod
-    def state_to_go_to(target_spec, index):
-        #0 works if its null and episillion
-        if target_spec[0]!=[] and len(target_spec[0])>index:
-            return(target_spec[0][index],True)
-        else:
-            return(target_spec[1][0],False)
+
         
-    #def follow_choice(self,choice_sequence, input_string):
+    def follow_choice(self,choice_sequence, input_string):
+        dlt=self.dlt
+        counter=0;
+        current_state=0;
+        places=[0]
+        convert=self.convert_delta()
+        final_state=None
+        for i in choice_sequence:
+            values= convert[(current_state,input_string[counter])]
+            result=state_to_go_to(values,i)
+            if result[1]==True:
+                counter+=1
+            current_state=result[0]
+            places+=[current_state]
+        if counter==len(input_string) and current_state==self.F[0]:
+            final_state=True
+        else:
+            final_state=False
+        return[places,final_state]
 
 def read_choice_input():
     choice_sequence=sys.stdin.readline()
@@ -70,18 +89,7 @@ def main():
     first=NDFA()
     first.read_from_stdin()
     choice_sequence ,input_string=read_choice_input()
-    result=first.convert_delta()
-    
-    last_key=list(result)[-1]
-    index=0
-    for key,values in result.items():
-        if values==[[],[]]:
-           continue
-        else:
-            while index<(len(values[0]) +len(values[1])) :
-                add=first.state_to_go_to(values,index)
-                print(str(key)+", "+str(index)+", "+ str(add)+"")
-                index+=1
-            index=0
+    transits=first.follow_choice(choice_sequence,input_string)
+    print(transits)
 if __name__=="__main__":
     main()
