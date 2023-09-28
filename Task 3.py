@@ -57,9 +57,8 @@ class NDFA:
 
         
     def follow_choice(self,choice_sequence, input_string):
-        dlt=self.dlt
-        counter=0;
-        current_state=0;
+        counter=0
+        current_state=0
         places=[0]
         convert=self.convert_delta()
         final_state=None

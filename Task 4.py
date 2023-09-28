@@ -1,6 +1,5 @@
 
 import sys,itertools
-@staticmethod
 def state_to_go_to(target_spec, index):
     #0 works if its null and episillion
     if target_spec[0]!=[] and len(target_spec[0])>index:
@@ -57,9 +56,8 @@ class NDFA:
 
         
     def follow_choice(self,choice_sequence, input_string):
-        dlt=self.dlt
-        counter=0;
-        current_state=0;
+        counter=0
+        current_state=0
         places=[0]
         convert=self.convert_delta()
         final_state=None
@@ -76,20 +74,45 @@ class NDFA:
             final_state=False
         return[places,final_state]
     
-def read_choice_input():
-    choice_sequence=sys.stdin.readline()
-    choice_sequence=eval(choice_sequence)
+    def generate_all_helper(self, current_choice, current_state, tape_index,tape):
+        result=[]
+        transitions=self.convert_delta()
+        moves=transitions[(current_state,tape[tape_index])]
+        print(moves)
+        print(current_choice)
+        if moves==[[],[]]:
+            return[current_choice,current_state,False]
+        if tape_index==len(tape) and self.F==current_state:
+            return[current_choice,current_state,True]
+        
+        future_moves=state_to_go_to(moves,current_choice)
+        if future_moves[1]==False:
+            result+=[self.generate_all_helper(0,future_moves[0],tape_index,tape)]
+        else:
+            current_choice+=1
+            tape_index+=1
+            
+            result+=[self.generate_all_helper(current_choice,current_state,tape_index,tape)]
+        return result
+        
 
+    def generate_all_processing_path(self,tape):
+        current_choice=0
+        current_state=0
+        tape_index=0
+        return self.generate_all_helper(current_choice,current_state,tape_index,tape)
+    
+def read_choice_input():
     input_string=sys.stdin.readline()
     input_string=eval(input_string)
+    return input_string
 
-    return choice_sequence, input_string
-    
 def main():
     first=NDFA()
     first.read_from_stdin()
-    choice_sequence ,input_string=read_choice_input()
-    transits=first.follow_choice(choice_sequence,input_string)
+    input_string=read_choice_input()
+    transits=first.generate_all_processing_path(input_string)
     print(transits)
+
 if __name__=="__main__":
     main()
