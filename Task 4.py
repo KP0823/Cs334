@@ -1,5 +1,6 @@
 
 import sys,itertools
+
 def state_to_go_to(target_spec, index):
     #0 works if its null and episillion
     if target_spec[0]!=[] and len(target_spec[0])>index:
@@ -74,33 +75,66 @@ class NDFA:
             final_state=False
         return[places,final_state]
     
-    def generate_all_helper(self, current_choice, current_state, tape_index,tape):
-        result=[]
-        transitions=self.convert_delta()
-        moves=transitions[(current_state,tape[tape_index])]
-        print(moves)
-        print(current_choice)
-        if moves==[[],[]]:
-            return[current_choice,current_state,False]
-        if tape_index==len(tape) and self.F==current_state:
-            return[current_choice,current_state,True]
-        
-        future_moves=state_to_go_to(moves,current_choice)
-        if future_moves[1]==False:
-            result+=[self.generate_all_helper(0,future_moves[0],tape_index,tape)]
-        else:
-            current_choice+=1
-            tape_index+=1
-            
-            result+=[self.generate_all_helper(current_choice,current_state,tape_index,tape)]
-        return result
-        
+    # def generate_all_helper(self, current_choice, current_state, tape_index,tape,):
+    #     result=[]
+    #     if tape_index==len(tape) and self.F==current_state:
+    #         return [current_choice,current_state,True]
+    #     if tape_index==len(tape) and self.F!=current_state:
+    #         return [current_choice,current_state,False]
+    #     current_choice=0
+    #     transitions=self.convert_delta()
+    #     moves=transitions[(current_state,tape[tape_index])]
 
+    #     if moves==[[],[]]:
+    #         #return[current_choice,current_state,False]
+    #         return result
+    #     if moves[0]!=[]:
+    #         for i in range(len(moves[0])):
+    #             future_moves=state_to_go_to(moves,current_choice)
+    #             print(result)
+    #             if future_moves[1]==False:
+    #                 #result= [current_choice,current_state,tape[tape_index::]]
+    #                 result+= self.generate_all_helper(0,future_moves[0],tape_index,tape)
+    #             elif future_moves[1]==True:
+    #                 #result= [current_choice,current_state,tape[tape_index::]]
+    #                 result+= [self.generate_all_helper(0,future_moves[0],tape_index+1,tape)]
+    
+    #             #result = [current_choice,current_state,tape[tape_index::]]
+    #             result += [self.generate_all_helper(current_choice+1,current_state, tape_index+1 ,tape)]
+    #     # elif moves[0]==[] and moves[1]!=[]:
+    #     #     result = [current_choice,current_state,tape[tape_index::]]
+    #     #     result+= [self.generate_all_helper(0,moves[1][0],tape_index,tape)]
+    #     return result
+
+
+    def gen_all_helper(self,current_choice,current_state,tape):
+        if tape=='' and current_state==self.F[0]:
+            return [current_choice,current_state,True]
+        if tape=='' and current_state!=self.F[0]:
+            return [current_choice,current_state,False]
+        delta=self.convert_delta()
+        list_of_states=delta[(current_state,tape[0])]
+        result=[current_choice,current_state,tape]
+        if list_of_states==[[],[]]:
+            return [current_choice,current_state,False]
+        if current_choice>=len(list_of_states[0]) and list_of_states[1]==[]:
+            return []
+        else:
+            goto=state_to_go_to(list_of_states, current_choice)
+            if(goto[1]==True):
+                result+=[self.gen_all_helper(0,goto[0],tape[1::])]
+            if(goto[1]==False):
+                result+=[self.gen_all_helper(0,goto[1],tape)]
+            result+=[self.gen_all_helper(current_choice+1,current_state,tape[1::])]
+        return result
+    #loop to the end moves[0]
+    #then try the moves[1]
     def generate_all_processing_path(self,tape):
         current_choice=0
         current_state=0
         tape_index=0
-        return self.generate_all_helper(current_choice,current_state,tape_index,tape)
+        #return self.generate_all_helper(current_choice,current_state,tape_index,tape)
+        return self.gen_all_helper(current_choice,current_state,tape)
     
 def read_choice_input():
     input_string=sys.stdin.readline()
