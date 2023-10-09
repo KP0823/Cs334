@@ -7,7 +7,29 @@ def state_to_go_to(target_spec, index):
         return(target_spec[0][index],True)
     else:
         return(target_spec[1][0],False)
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
+def convert(an,choice,states):
+    if an==[]:
+        return 
+    else:
+        if len(an)==3 and isinstance(an[2],bool) and (an[2]==True or an[2]==False):
+            choice+=(an[0],)
+            states+=(an[1],)
+            print("("+str(choice)+", "+str(states)+") --> "+str(an[2]))
+        else:
+            if(an[0]!=None and states[0]!=None):
+                choice+=(an[0],)
+                states+=(an[1],)
+            for i in an:
+                if isinstance(i, list):
+                    convert(i,choice,states)
+
+    return
     
+
 class NDFA:
     def __init__(self):
         self.states=None
@@ -74,67 +96,44 @@ class NDFA:
         else:
             final_state=False
         return[places,final_state]
-    
-    # def generate_all_helper(self, current_choice, current_state, tape_index,tape,):
-    #     result=[]
-    #     if tape_index==len(tape) and self.F==current_state:
-    #         return [current_choice,current_state,True]
-    #     if tape_index==len(tape) and self.F!=current_state:
-    #         return [current_choice,current_state,False]
-    #     current_choice=0
-    #     transitions=self.convert_delta()
-    #     moves=transitions[(current_state,tape[tape_index])]
 
-    #     if moves==[[],[]]:
-    #         #return[current_choice,current_state,False]
-    #         return result
-    #     if moves[0]!=[]:
-    #         for i in range(len(moves[0])):
-    #             future_moves=state_to_go_to(moves,current_choice)
-    #             print(result)
-    #             if future_moves[1]==False:
-    #                 #result= [current_choice,current_state,tape[tape_index::]]
-    #                 result+= self.generate_all_helper(0,future_moves[0],tape_index,tape)
-    #             elif future_moves[1]==True:
-    #                 #result= [current_choice,current_state,tape[tape_index::]]
-    #                 result+= [self.generate_all_helper(0,future_moves[0],tape_index+1,tape)]
-    
-    #             #result = [current_choice,current_state,tape[tape_index::]]
-    #             result += [self.generate_all_helper(current_choice+1,current_state, tape_index+1 ,tape)]
-    #     # elif moves[0]==[] and moves[1]!=[]:
-    #     #     result = [current_choice,current_state,tape[tape_index::]]
-    #     #     result+= [self.generate_all_helper(0,moves[1][0],tape_index,tape)]
-    #     return result
+    def gen(self,choice,current,tape, an):
+        if tape=='' and current==self.F[0]:
+            an.append([choice,current,True])
+            return
+        if tape=='' and current!=self.F[0]:
+            an.append([choice,current,False])
+            return
+        dlt= self.convert_delta()
+        list_of_states=dlt[current,tape[0]]
+        if(list_of_states==[[],[]]):
+            an.append([choice,current,False])
+            return
+        an.append([choice,current])
+        for i in range(len(list_of_states[0])):
+            self.gen(i,list_of_states[0][i],tape[1::],an[-1])
+        for k in range(len(list_of_states[1])):
+            if list_of_states[0]==[]:
+                self.gen(k,list_of_states[1][k],tape,an[-1])
+            else:
+                self.gen(len(list_of_states[0]),list_of_states[1][k],tape,an[-1])
+        return
 
-
-    def gen_all_helper(self,current_choice,current_state,tape):
-        if tape=='' and current_state==self.F[0]:
-            return [current_choice,current_state,True]
-        if tape=='' and current_state!=self.F[0]:
-            return [current_choice,current_state,False]
-        delta=self.convert_delta()
-        list_of_states=delta[(current_state,tape[0])]
-        result=[current_choice,current_state,tape]
-        if list_of_states==[[],[]]:
-            return [current_choice,current_state,False]
-        if current_choice>=len(list_of_states[0]) and list_of_states[1]==[]:
-            return []
-        else:
-            goto=state_to_go_to(list_of_states, current_choice)
-            if(goto[1]==True):
-                result+=[self.gen_all_helper(0,goto[0],tape[1::])]
-            if(goto[1]==False):
-                result+=[self.gen_all_helper(0,goto[1],tape)]
-            result+=[self.gen_all_helper(current_choice+1,current_state,tape[1::])]
-        return result
-    #loop to the end moves[0]
-    #then try the moves[1]
     def generate_all_processing_path(self,tape):
-        current_choice=0
-        current_state=0
-        tape_index=0
-        #return self.generate_all_helper(current_choice,current_state,tape_index,tape)
-        return self.gen_all_helper(current_choice,current_state,tape)
+        an=[]
+        dlt=self.convert_delta()
+        list_of_states=dlt[0,tape[0]]
+        for i in range(len(list_of_states[0])):
+            an.append([0])
+            self.gen(i,list_of_states[0][i],tape[1::],an[-1])
+        for k in range(len(list_of_states[1])):
+            an.append([0])
+            self.gen(k,list_of_states[1][k],tape,an[-1])
+        for l in an:
+           choices=()
+           states=(0,)
+           convert(flatten(l[1::]),choices,states)
+        return an
     
 def read_choice_input():
     input_string=sys.stdin.readline()
@@ -146,7 +145,6 @@ def main():
     first.read_from_stdin()
     input_string=read_choice_input()
     transits=first.generate_all_processing_path(input_string)
-    print(transits)
-
+  
 if __name__=="__main__":
     main()
